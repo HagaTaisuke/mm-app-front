@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AuthService from './authService';
 import axios from 'axios';
+import './App.css';
 
 const Profile = () => {
     const [userData, setUserData] = useState(null);
@@ -11,30 +12,52 @@ const Profile = () => {
     const [date, setDate] = useState('');
     const [description, setDescription] = useState('');
     const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const user = AuthService.getCurrentUser();
 
         if (user && user.userId) {
+            const source = axios.CancelToken.source();
+
             axios.get(`http://localhost:8080/api/users/${user.userId}`, {
                 headers: {
                     'Authorization': 'Bearer ' + user.token
-                }
+                },
+                cancelToken: source.token
             }).then(response => {
                 setUserData(response.data);
             }).catch(error => {
-                console.error('Error fetching user data:', error);
+                if (axios.isCancel(error)) {
+                    console.log('Request canceled', error.message);
+                } else {
+                    console.error('Error fetching user data:', error);
+                    setError('Failed to fetch user data. Please try again later.');
+                }
             });
 
             axios.get(`http://localhost:8080/api/transactions/sum/${user.userId}`, {
                 headers: {
                     'Authorization': 'Bearer ' + user.token
-                }
+                },
+                cancelToken: source.token
             }).then(response => {
                 setTransactionSum(response.data);
             }).catch(error => {
-                console.error('Error fetching transaction sum:', error);
+                if (axios.isCancel(error)) {
+                    console.log('Request canceled', error.message);
+                } else {
+                    console.error('Error fetching transaction sum:', error);
+                    setMessage('Failed to fetch transaction sum. Please try again later.');
+                    if (error.response && error.response.data) {
+                        setMessage(error.response.data.message || 'Failed to fetch transaction sum. Please try again later.');
+                    }
+                }
             });
+
+            return () => {
+                source.cancel('Operation canceled by the user.');
+            };
         }
     }, []);
 
@@ -60,16 +83,27 @@ const Profile = () => {
                 setMessage('Transaction added successfully');
                 setTransactionSum(prevSum => prevSum + transaction.amount);
                 setAmount('');
-                setType('income');
+                setType('INCOME');
                 setCategory('');
                 setDate('');
                 setDescription('');
             }).catch(error => {
                 setMessage('Failed to add transaction');
                 console.error('Error adding transaction:', error);
+                setError('Failed to add transaction. Please try again later.');
             });
         }
     };
+
+    // const resetForm = () => {
+    //     setAmount('');
+    //     setType('INCOME');
+    //     setCategory('');
+    //     setDate('');
+    //     setDescription('');
+    //     setMessage('');
+    //     setError('');
+    // };
 
     return (
         <div>
@@ -123,6 +157,7 @@ const Profile = () => {
                         <button type="submit">Add Transaction</button>
                     </form>
                     {message && <div>{message}</div>}
+                    {error && <div style={{ color: 'red' }}>{error}</div>}
                 </div>
             ) : (
                 <p>Loading...</p>
@@ -132,4 +167,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
