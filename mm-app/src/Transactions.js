@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import AuthService from "./authService";
 import axios from "axios";
 
@@ -81,6 +82,11 @@ const Transactions = () => {
           ))}
         </tbody>
       </table>
+      <p>
+        <Link to="/Profile" className="button-link">
+          戻る
+        </Link>
+      </p>
     </div>
   );
 };

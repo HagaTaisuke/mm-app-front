@@ -15,12 +15,9 @@ const Login = () => {
 
     AuthService.login(username, password).then(
       (response) => {
-        // ログイン成功時にユーザー情報を取得
         console.log(response);
         userService.getUserData(response.userId).then((userResponse) => {
-          // 必要に応じてユーザー情報を保存または表示
           console.log(userResponse.data);
-          // ログイン成功後にプロフィールページに遷移
           navigate("/profile");
         });
       },
@@ -37,7 +34,7 @@ const Login = () => {
     <div class="container">
       <form onSubmit={handleLogin}>
         <div>
-          <label>Username</label>
+          <label>ユーザー名</label>
           <input
             type="text"
             value={username}
@@ -45,19 +42,20 @@ const Login = () => {
           />
         </div>
         <div>
-          <label>Password</label>
+          <label>パスワード</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit">ログイン</button>
       </form>
       {message && <div>{message}</div>}
       <div className="regiLink">
         <p>
-          Don't have an account? <Link to="/register">Register here</Link>
+          アカウントがありませんか？{" "}
+          <Link to="/register">アカウントを作成</Link>
         </p>
       </div>
     </div>
