@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import AuthService from "./authService";
 import axios from "axios";
 import "./App.css";
 
 const Profile = () => {
   const [userData, setUserData] = useState(null);
-  const [transactionSum, setTransactionSum] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("INCOME");
   const [category, setCategory] = useState("");
-  const today = new Date().toISOString();
+  const today = new Date().toISOString().split("T")[0];
   const [date, setDate] = useState(today);
   const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [ApiURL, setAPI] = useState("");
+  const [apiURL, setApiURL] = useState("");
+  const [userId, setUserId] = useState(null); // userId を追加
 
   useEffect(() => {
     const user = AuthService.getCurrentUser();
-    const userId = user.userId;
-    setAPI(`http://localhost:8080/api/transactions/${userId}`);
-
-    if (user && user.userId) {
+    if (user) {
+      setUserId(user.userId); // userId をセット
+      setApiURL(`http://localhost:8080/api/transactions/${user.userId}`); // apiURL をセット
       const source = axios.CancelToken.source();
       axios
-        .get(`http://localhost:8080/api/users/${userId}`, {
+        .get(`http://localhost:8080/api/users/${user.userId}`, {
           headers: {
             Authorization: "Bearer " + user.token,
           },
@@ -42,15 +43,25 @@ const Profile = () => {
           }
         });
 
+      return () => {
+        source.cancel("Operation canceled by the user.");
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    if (apiURL) {
+      const source = axios.CancelToken.source();
+      const user = AuthService.getCurrentUser();
       axios
-        .get(ApiURL + "/sum", {
+        .get(`${apiURL}/sum`, {
           headers: {
             Authorization: "Bearer " + user.token,
           },
           cancelToken: source.token,
         })
         .then((response) => {
-          setTransactionSum(response.data);
+          setTotalAmount(response.data);
         })
         .catch((error) => {
           if (axios.isCancel(error)) {
@@ -73,11 +84,16 @@ const Profile = () => {
         source.cancel("Operation canceled by the user.");
       };
     }
-  }, [ApiURL]);
+  }, [apiURL]);
 
   const handleAddTransaction = (e) => {
     e.preventDefault();
     const user = AuthService.getCurrentUser();
+
+    if (!amount.trim()) {
+      setError("金額を入力してください。");
+      return;
+    }
 
     if (user && user.userId) {
       let transactionAmount = parseInt(amount, 10);
@@ -95,19 +111,20 @@ const Profile = () => {
       };
 
       axios
-        .post(ApiURL, transaction, {
+        .post(apiURL, transaction, {
           headers: {
             Authorization: "Bearer " + user.token,
           },
         })
         .then((response) => {
           setMessage("Transaction added successfully");
-          setTransactionSum((prevSum) => prevSum + transaction.amount);
+          setTotalAmount((prevSum) => prevSum + transaction.amount);
           setAmount("");
           setType("INCOME");
           setCategory("");
           setDate(today);
           setDescription("");
+          setError("");
         })
         .catch((error) => {
           setMessage("Failed to add transaction");
@@ -117,22 +134,12 @@ const Profile = () => {
     }
   };
 
-  // const resetForm = () => {
-  //     setAmount('');
-  //     setType('INCOME');
-  //     setCategory('');
-  //     setDate('');
-  //     setDescription('');
-  //     setMessage('');
-  //     setError('');
-  // };
-
   return (
     <div>
       {userData ? (
         <div>
           <h1>{userData.username}'s Profile</h1>
-          <h2>Total Amount: {transactionSum}</h2>
+          <h2>Total Amount: {totalAmount}</h2>
 
           <form onSubmit={handleAddTransaction}>
             <div>
@@ -168,14 +175,17 @@ const Profile = () => {
               />
             </div>
             <div>
-              <label>Description</label>
+              <label>メモ</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-            <button type="submit">Add</button>
+            <button type="submit">追加</button>
           </form>
+          <p>
+            <Link to={"/Transactions"}>Transactions here</Link>
+          </p>
           {message && (
             <div className="alert alert-success" role="alert">
               {message}
