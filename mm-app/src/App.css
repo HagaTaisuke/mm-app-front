@@ -1,36 +1,110 @@
-.App {
-  text-align: center;
+/* グローバルスタイル */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #e0f7fa; /* 薄い水色の背景 */
+  color: #333;
+  margin: 0;
+  padding: 0;
 }
 
-form {
+/* コンテナスタイル */
+div .container {
+  max-width: 600px;
   margin: 20px auto;
   padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  width: 300px;
+  background-color: #ffffff; /* 白色の背景 */
+  border-radius: 10px;
 }
 
-div {
-  margin-bottom: 10px;
+/* フォーム要素スタイル */
+form div {
+  margin-bottom: 15px;
 }
 
 label {
-  margin-right: 10px;
+  display: block;
+  margin-bottom: 5px;
+  color: #00796b; /* 水色のラベル */
 }
 
-button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #00796b; /* 水色のボーダー */
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+/* ボタンスタイル */
+button,
+.button-link {
+  background-color: #00796b; /* 水色のボタン */
   color: white;
+  padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  text-decoration: none; /* リンクの下線を消す */
+  display: inline-block; /* ボタンのように表示 */
+  text-align: center; /* テキストを中央に配置 */
+  font-size: 16px; /* フォントサイズを統一 */
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #004d40; /* ボタンホバー時の濃い水色 */
 }
 
-.regiLink p {
-  text-align: center;
+/* メッセージスタイル */
+.alert-success {
+  background-color: #e0f2f1; /* 薄い緑色の背景 */
+  color: #00796b;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.alert-danger {
+  background-color: #ffebee; /* 薄い赤色の背景 */
+  color: #d32f2f;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* リンクスタイル */
+a {
+  color: #00796b; /* 水色のリンク */
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* テーブルスタイル */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+thead {
+  background-color: #00796b; /* 水色のヘッダー */
+  color: white;
+}
+
+th,
+td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
 }

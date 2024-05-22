@@ -137,9 +137,9 @@ const Profile = () => {
   return (
     <div>
       {userData ? (
-        <div>
+        <div class="container">
           <h1>{userData.username}'s Profile</h1>
-          <h2>Total Amount: {totalAmount}</h2>
+          <h2>Total: {totalAmount.toLocaleString()} 円</h2>
 
           <form onSubmit={handleAddTransaction}>
             <div>
@@ -184,7 +184,9 @@ const Profile = () => {
             <button type="submit">追加</button>
           </form>
           <p>
-            <Link to={"/Transactions"}>Transactions here</Link>
+            <Link to="/Transactions" className="button-link">
+              詳細
+            </Link>
           </p>
           {message && (
             <div className="alert alert-success" role="alert">

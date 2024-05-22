@@ -57,8 +57,8 @@ const Transactions = () => {
   }
 
   return (
-    <div>
-      <h1>All Transactions</h1>
+    <div class="container">
+      <h1>Transactions</h1>
       <table>
         <thead>
           <tr>

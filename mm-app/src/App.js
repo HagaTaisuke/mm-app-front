@@ -15,7 +15,7 @@ import AdminPanel from "./AdminPanel";
 const App = () => {
   return (
     <Router>
-      <div>
+      <div className="wrapper">
         <Routes>
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/register" element={<Register />} />
