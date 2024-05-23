@@ -16,13 +16,14 @@ const Profile = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [apiURL, setApiURL] = useState("");
-  const [userId, setUserId] = useState(null); // userId を追加
+  const [userId, setUserId] = useState(null);
+  const [latestTransactions, setLatestTransactions] = useState([]);
 
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     if (user) {
-      setUserId(user.userId); // userId をセット
-      setApiURL(`http://localhost:8080/api/transactions/${user.userId}`); // apiURL をセット
+      setUserId(user.userId);
+      setApiURL(`http://localhost:8080/api/transactions/${user.userId}`);
       const source = axios.CancelToken.source();
       axios
         .get(`http://localhost:8080/api/users/${user.userId}`, {
@@ -74,9 +75,28 @@ const Profile = () => {
             if (error.response && error.response.data) {
               setMessage(
                 error.response.data.message ||
-                  "Failed to fetch transaction sum. Please try again later."
+                "Failed to fetch transaction sum. Please try again later."
               );
             }
+          }
+        });
+
+      axios
+        .get(apiURL, {
+          headers: {
+            Authorization: "Bearer " + user.token,
+          },
+          cancelToken: source.token,
+        })
+        .then((response) => {
+          setLatestTransactions(response.data.slice(0, 5));
+        })
+        .catch((error) => {
+          if (axios.isCancel(error)) {
+            console.log("Request canceled", error.message);
+          } else {
+            console.error("Error fetching latest transactions:", error);
+            setError("Failed to fetch latest transactions. Please try again later.");
           }
         });
 
@@ -125,6 +145,7 @@ const Profile = () => {
           setDate(today);
           setDescription("");
           setError("");
+          setLatestTransactions([response.data, ...latestTransactions].slice(0, 5));
         })
         .catch((error) => {
           setMessage("Failed to add transaction");
@@ -134,10 +155,28 @@ const Profile = () => {
     }
   };
 
+  const formatISODateToYYYYMMDD = (isoDateString) => {
+    const date = new Date(isoDateString);
+    return date.toISOString().split("T")[0];
+  };
+
+  const getTypeInJapanese = (type) => {
+    switch (type) {
+      case 'expense':
+        return '支出';
+      case 'income':
+        return '収入';
+      case 'subscription':
+        return '定期';
+      default:
+        return type;
+    }
+  };
+
   return (
     <div>
       {userData ? (
-        <div class="container">
+        <div className="container">
           <h1>{userData.username}'s Profile</h1>
           <h2>Total: {totalAmount.toLocaleString()} 円</h2>
 
@@ -183,11 +222,37 @@ const Profile = () => {
             </div>
             <button type="submit">追加</button>
           </form>
+
+          <h2>最新のトランザクション</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th>タイプ</th>
+                <th>カテゴリー</th>
+                <th>金額</th>
+                <th>メモ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {latestTransactions.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td>{formatISODateToYYYYMMDD(transaction.date)}</td>
+                  <td>{transaction.type}</td>
+                  <td>{getTypeInJapanese(transaction.type)}</td>
+                  <td>{transaction.amount}</td>
+                  <td>{transaction.description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
           <p>
             <Link to="/Transactions" className="button-link">
               詳細
             </Link>
           </p>
+
           {message && (
             <div className="alert alert-success" role="alert">
               {message}
@@ -207,3 +272,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

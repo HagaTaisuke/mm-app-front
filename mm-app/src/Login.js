@@ -24,14 +24,14 @@ const Login = () => {
       (error) => {
         setMessage(
           "Failed to login: " +
-            (error.response?.data?.error || "Unexpected error")
+          (error.response?.data?.error || "Unexpected error")
         );
       }
     );
   };
 
   return (
-    <div class="container">
+    <div className="container">
       <form onSubmit={handleLogin}>
         <div>
           <label>ユーザー名</label>
